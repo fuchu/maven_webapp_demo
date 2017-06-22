@@ -7,32 +7,22 @@ def dockerCredentialsID = '99fce050-1f09-4f51-a798-f78bd8af8875'
 def ContainerName = 'mavenjunittesttomcatdemo'
 try{
 	stage('SCMCheckout') {
-		node('master'){
+		node('master') {
 			properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', aeertifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '20')), pipelineTriggers([pollSCM('*/1 * * * *')])])
 		}
-    	//checkout codes from github
 		node('docker') {
-    		//properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '20')), pipelineTriggers([pollSCM('*/1 * * * *')])])
 			checkout([$class: 'GitSCM', branches: [[name: gitBranches]], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'CloneOption', depth: 0, noTags: false, reference: '', shallow: false, timeout: 60]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: gitCredentialsID, url: gitUrl]]])
-    		//stash incudes: 'staging_vars_azure.yml', name: 'AnsibleVars'
-    		//stash includes: '*.yml', name: 'AnsibleFile'
 			stash includes: '**', name: 'SourceCode'
 		}
-	}
+    }
 	
     parallel 'Build':{
 		stage('Build') {
-    		//build codes with maven version 3
 			node('docker') {
 				unstash 'SourceCode'
-    			//ansiColor('xterm') {
-    	  		    //sh "'${mvnHome}/bin/mvn' clean install -Dmaven.test.skip=true -Pstaging"
-    	  			//sh "'${mvnHome}/bin/mvn' clean cobertura:cobertura -Dcobertura.report.format=xml -Dmaven.test.skip=true -Dmaven.test.failure.ignore install -Pstaging"
-    			//}
 				docker.image('kevin123zhou/maven').withrun(-v "'$WORKSPACE':/usr/src/webapp" --rm){
 					maven install -Dmaven.test.skip=true
 				}
-    			//dir('**/target') {stash name: 'war', includes: '*.war'}
 				stash name: 'war', includes: '**/target/*.war'
 			}
 		}
@@ -51,21 +41,9 @@ try{
 				docker.image('kevin123zhou/maven').withrun(-v "'$WORKSPACE':/usr/src/webapp" --rm){
 					maven test cobertura:cobertura -Dcobertura.report.format=xml -Dmaven.test.failure.ignore -Dmaven.test.skip=true
 				}
-    			// if (isUnix()){
-    			// 	ansiColor('xterm') {
-    	  		// 	sh "'${mvnHome}/bin/mvn' clean cobertura:cobertura -Dcobertura.report.format=xml -Dmaven.test.failure.ignore -Dmaven.test.skip=true install -Pstaging"
-    			// 	}
-    			// } else {
-    			// 	ansiColor('xterm') {
-    			// 	bat(/"${mvnHome}\bin\mvn" clean cobertura:cobertura -Dcobertura.report.format=xml -Dmaven.test.failure.ignore -Dmaven.test.skip=true install -Pstaging/)
-    			// 	}
-    			// }
 			}
 			stage('TestReports') {
-    				//cobertura报告
 				step([$class: 'CoberturaPublisher', autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: 'online_reservation_*/target/site/cobertura/*.xml', failNoReports: false, failUnhealthy: false, failUnstable: false, maxNumberOfBuilds: 0, onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false])
-    				//junit allowEmptyResults: true, keepLongStdio: true, testResults: '<fileset dir="/var/lib/jenkins/workspace/$BUILD_ID"><filename name="online_reservation_backend/target/surefire-reports/*.xml"/><filename name="online_reservation_frontend/target/surefire-reports/*.xml"/><filename name="online_reservation_common/target/surefire-reports/*.xml"/></fileset>'
-    				//junit test报告
 				junit allowEmptyResults: true, keepLongStdio: true, testResults: '**/target/surefire-reports/*.xml'
 			}
 		}
