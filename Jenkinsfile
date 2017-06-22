@@ -19,6 +19,7 @@ try{
 			stash includes: '**', name: 'SourceCode'
 		}
 	}
+
 	parallel 'Build': {
 		stage('Build') {
     		//build codes with maven version 3
