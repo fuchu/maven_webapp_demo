@@ -16,6 +16,6 @@
     </dependency>
   </dependencies>
   <build>
-    <finalName>maven_webapp_demo</finalName>
+    <finalName>ROOT</finalName>
   </build>
 </project>
