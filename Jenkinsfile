@@ -19,7 +19,6 @@ try{
 			stash includes: '**', name: 'SourceCode'
 		}
 	}
-
 	parallel 'Build': {
 		stage('Build') {
     		//build codes with maven version 3
@@ -70,7 +69,6 @@ try{
 			}
 		}
 	}
-    
 	stage('Deploy') {
 		node(master) {
 			sh "docker stack deploy -c docker-compose.yml myWebappDemo"
