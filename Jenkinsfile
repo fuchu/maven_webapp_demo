@@ -19,8 +19,8 @@ try{
     		stash includes: '**', name: 'SourceCode'
     	}
     }
-    
-    parallel 'Build': {
+   
+	parallel 'Build': {
 		stage('Build') {
     		//build codes with maven version 3
     		node('docker') {
@@ -30,7 +30,7 @@ try{
     	  			//sh "'${mvnHome}/bin/mvn' clean cobertura:cobertura -Dcobertura.report.format=xml -Dmaven.test.skip=true -Dmaven.test.failure.ignore install -Pstaging"
     			//}
                 docker.image('kevin123zhou/maven').withrun(-v "'$WORKSPACE':/usr/src/webapp" --rm){
-                    maven install -Dmaven.test.skip=true
+                	maven install -Dmaven.test.skip=true
                 }
     			//dir('**/target') {stash name: 'war', includes: '*.war'}
     			stash name: 'war', includes: '**/target/*.war'
