@@ -20,7 +20,7 @@ try{
     	}
     }
     
-    parallel 'Build' :{
+    parallel 'Build': {
     	stage('Build') {
     		//build codes with maven version 3
     		node('docker') {
