@@ -7,7 +7,7 @@ def dockerCredentialsID = '99fce050-1f09-4f51-a798-f78bd8af8875'
 def ContainerName = 'mavenjunittesttomcatdemo'
 try{
 	stage('SCMCheckout') {
-		node(master){
+		node('master'){
 			properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', aeertifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '20')), pipelineTriggers([pollSCM('*/1 * * * *')])])
 		}
     	//checkout codes from github
