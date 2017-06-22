@@ -16,7 +16,7 @@ def ContainerName = 'mavenjunittesttomcatdemo'
 	// 	}
 	// }
 try{
-    parallel 'Build':{
+    parallel 'Build': {
 		stage('Build') {
 			node('docker') {
 				unstash 'SourceCode'
@@ -34,7 +34,7 @@ try{
 				}
 			}
 		}
-	}, 'TestAndReports': {
+    }, 'TestAndReports': {
 		node('docker') {
 			stage('Test') {
 				unstash 'SourceCode'
