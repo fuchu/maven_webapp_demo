@@ -21,7 +21,7 @@ try{
     }
     
     parallel 'Build': {
-    	stage('Build') {
+		stage('Build') {
     		//build codes with maven version 3
     		node('docker') {
     			unstash 'SourceCode'
@@ -44,7 +44,7 @@ try{
                 }
             }
         }
-    }, 'TestAndReports': {
+	}, 'TestAndReports': {
     	node('docker') {
     		stage('Test') {
     			unstash 'SourceCode'
