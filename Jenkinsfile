@@ -30,11 +30,11 @@ try{
     	  			//sh "'${mvnHome}/bin/mvn' clean cobertura:cobertura -Dcobertura.report.format=xml -Dmaven.test.skip=true -Dmaven.test.failure.ignore install -Pstaging"
     			//}
 				docker.image('kevin123zhou/maven').withrun(-v "'$WORKSPACE':/usr/src/webapp" --rm){
-				maven install -Dmaven.test.skip=true
+					maven install -Dmaven.test.skip=true
 				}
     			//dir('**/target') {stash name: 'war', includes: '*.war'}
 				stash name: 'war', includes: '**/target/*.war'
-				}
+			}
 		}
 		stage('Package') {
 			node('docker') {
@@ -85,7 +85,7 @@ try{
 }
 catch(Exception e){
 	currentBuild.result = "FAILED"
-		//触发失败邮件
+	//触发失败邮件
     //notifyFailed(toEmail)
 	throw e
 }
