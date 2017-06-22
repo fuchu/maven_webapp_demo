@@ -1,0 +1,31 @@
+version: "3"
+services:
+  web:
+    #image: tomcat:8.5.15-jre8-alpine
+    #image: tomcat:8.0.44-jre8-alpine
+    #image: tomcat:7.0.78-jre8-alpine
+    image: kevin123zhou/mavenjunittesttomcatdemo
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 100M
+        restart_policy:
+          condition: on-failure
+      update_config:
+        parallelism: 1
+        #max_failure_ratio: 0
+        #failure_action: continue
+    healthcheck:
+      #test: curl -f http://localhost:8080 && echo 'cool,it works.'
+      test: echo 'cool,it works'
+      #interval: 30s
+      timeout: 5s
+      retries: 3
+    ports:
+      - "8082:8080"
+    networks:
+      - webnet
+networks:
+  webnet:
