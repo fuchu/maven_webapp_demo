@@ -97,7 +97,7 @@ catch(Exception e){
 //        mimeType: 'text/html', 
 //        to: toEmail
 //    )
-}
+//}
 //def notifySuccessful(toEmail) {
 //    emailext (      
 //        subject: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
