@@ -16,54 +16,46 @@ try{
         }
     }
     parallel 'Build': {
-    	stage('Build') {
-    		node('docker') {
-    			unstash 'SourceCode'
-    			docker.image('kevin123zhou/maven').withrun(-v "'$WORKSPACE':/usr/src/webapp" --rm){
-    				maven install -Dmaven.test.skip=true
-    			}
-    			stash name: 'war', includes: '**/target/*.war'
-    		}
-    	}
-    	stage('Package') {
-    		node('docker') {
-    			unstash 'war'
-    			docker.withRegistry('registry.hub.docker.com',dockerCredentialsID){
-    				docker.build(ContainerName).push('lastest')
-    			}
-    		}
-    	}
+        stage('Build') {
+            node('docker') {
+                unstash 'SourceCode'
+                docker.image('kevin123zhou/maven').withrun(-v "'$WORKSPACE':/usr/src/webapp" --rm){
+                    maven install -Dmaven.test.skip=true
+                }
+                stash name: 'war', includes: '**/target/*.war'
+            }
+        }
+        stage('Package') {
+            node('docker') {
+                unstash 'war'
+                    docker.withRegistry('registry.hub.docker.com',dockerCredentialsID){
+                    docker.build(ContainerName).push('lastest')
+                }
+            }
+        }
     }, 'TestAndReports': {
-    	node('docker') {
-    		stage('Test') {
-    			unstash 'SourceCode'
-    			docker.image('kevin123zhou/maven').withrun(-v "'$WORKSPACE':/usr/src/webapp" --rm){
-    				maven test cobertura:cobertura -Dcobertura.report.format=xml -Dmaven.test.failure.ignore -Dmaven.test.skip=true
-    			}
-    		}
-    		stage('TestReports') {
-    			step([$class: 'CoberturaPublisher', autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: 'online_reservation_*/target/site/cobertura/*.xml', failNoReports: false, failUnhealthy: false, failUnstable: false, maxNumberOfBuilds: 0, onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false])
-    			junit allowEmptyResults: true, keepLongStdio: true, testResults: '**/target/surefire-reports/*.xml'
-    		}
-    	}
+        node('docker') {
+            stage('Test') {
+                unstash 'SourceCode'
+                docker.image('kevin123zhou/maven').withrun(-v "'$WORKSPACE':/usr/src/webapp" --rm){
+                    maven test cobertura:cobertura -Dcobertura.report.format=xml -Dmaven.test.failure.ignore -Dmaven.test.skip=true
+                }
+            }
+            stage('TestReports') {
+                step([$class: 'CoberturaPublisher', autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: 'online_reservation_*/target/site/cobertura/*.xml', failNoReports: false, failUnhealthy: false, failUnstable: false, maxNumberOfBuilds: 0, onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false])
+                junit allowEmptyResults: true, keepLongStdio: true, testResults: '**/target/surefire-reports/*.xml'
+            }
+        }
     }
-
     stage('Deploy') {
-    	node(master) {
-    		sh "docker stack deploy -c docker-compose.yml myWebappDemo"
-    	}
-    	// node('ansible') {
-    	// 	unstash 'war'
-    	// 	unstash 'AnsibleFile'
-    	// 	sh 'ansible-playbook deploy_online_build_azure.yml --extra-vars "varsfile=staging_vars_azure_appstaging"'
-    	// }
+        node(master) {
+            sh "docker stack deploy -c docker-compose.yml myWebappDemo"
+        }
     }
     notifySuccessful(toEmail)
 }
 catch(Exception e){
     currentBuild.result = "FAILED"
-	//触发失败邮件
-    //notifyFailed(toEmail)
     throw e
 }
 
