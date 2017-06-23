@@ -19,7 +19,7 @@ try {
         stage('Build') {
             node('docker') {
                 unstash 'SourceCode'
-                docker.image('kevin123zhou/maven').withrun(-v '$WORKSPACE':/usr/src/webapp --rm){
+                docker.image('kevin123zhou/maven').withrun("-v '$WORKSPACE':/usr/src/webapp --rm"){
                     maven install -Dmaven.test.skip=true
                 }
                 stash name: 'war', includes: '**/target/*.war'
