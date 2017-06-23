@@ -6,11 +6,10 @@ def toEmail = 'kevin.zhou@softtek.com'
 def dockerCredentialsID = '99fce050-1f09-4f51-a798-f78bd8af8875'
 def ContainerName = 'mavenjunittesttomcatdemo'
 try{
-    properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', aeertifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '20')), pipelineTriggers([pollSCM('*/1 * * * *')])])
     stage('SCMCheckout') {
-    	// node('master') {
-    	// 	properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', aeertifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '20')), pipelineTriggers([pollSCM('*/1 * * * *')])])
-    	// }
+    	node('master') {
+    		properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', aeertifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '20')), pipelineTriggers([pollSCM('*/1 * * * *')])])
+    	}
     	node('docker') {
     		checkout([$class: 'GitSCM', branches: [[name: gitBranches]], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'CloneOption', depth: 0, noTags: false, reference: '', shallow: false, timeout: 60]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: gitCredentialsID, url: gitUrl]]])
     		stash includes: '**', name: 'SourceCode'
