@@ -5,7 +5,7 @@ def gitUrl = 'git@github.com:fuchu/maven_webapp_demo.git'
 def toEmail = 'kevin.zhou@softtek.com'
 def dockerCredentialsID = '99fce050-1f09-4f51-a798-f78bd8af8875'
 def ContainerName = 'mavenjunittesttomcatdemo'
-try{
+try {
     stage('SCMCheckout') {
         node('master') {
             properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', aeertifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '20')), pipelineTriggers([pollSCM('*/1 * * * *')])])
