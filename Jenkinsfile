@@ -20,7 +20,7 @@ try {
             node('docker') {
                 unstash 'SourceCode'
                 docker.image('kevin123zhou/maven').withrun("-v '$WORKSPACE':/usr/src/webapp --rm"){
-                    maven install -Dmaven.test.skip=true
+                    sh 'maven install -Dmaven.test.skip=true'
                 }
                 stash name: 'war', includes: '**/target/*.war'
             }
@@ -38,7 +38,7 @@ try {
             stage('Test') {
                 unstash 'SourceCode'
                 docker.image('kevin123zhou/maven').withrun("-v '$WORKSPACE':/usr/src/webapp --rm"){
-                    maven test cobertura:cobertura -Dcobertura.report.format=xml -Dmaven.test.failure.ignore -Dmaven.test.skip=true
+                   sh'maven test cobertura:cobertura -Dcobertura.report.format=xml -Dmaven.test.failure.ignore -Dmaven.test.skip=true'
                 }
             }
             stage('TestReports') {
