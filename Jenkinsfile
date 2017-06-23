@@ -37,7 +37,7 @@ try {
         node('docker') {
             stage('Test') {
                 unstash 'SourceCode'
-                docker.image('kevin123zhou/maven').withrun(-v "'$WORKSPACE':/usr/src/webapp" --rm){
+                docker.image('kevin123zhou/maven').withrun("-v '$WORKSPACE':/usr/src/webapp --rm"){
                     maven test cobertura:cobertura -Dcobertura.report.format=xml -Dmaven.test.failure.ignore -Dmaven.test.skip=true
                 }
             }
