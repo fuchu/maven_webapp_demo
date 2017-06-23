@@ -15,7 +15,7 @@ try {
             stash includes: '**', name: 'SourceCode'
         }
     }
-    parallel 'Build': {
+    parallel ('Build': {
         stage('Build') {
             node('docker') {
                 unstash 'SourceCode'
@@ -46,7 +46,7 @@ try {
                 junit allowEmptyResults: true, keepLongStdio: true, testResults: '**/target/surefire-reports/*.xml'
             }
         }
-    }
+    })
     stage('Deploy') {
         node(master) {
             sh "docker stack deploy -c docker-compose.yml myWebappDemo"
