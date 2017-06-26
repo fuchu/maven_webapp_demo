@@ -19,8 +19,8 @@ try {
         stage('Build') {
             node('docker') {
                 unstash 'SourceCode'
-                docker.image('kevin123zhou/maven').withrun("-v '$WORKSPACE':/usr/src/webapp --rm"){
-                    sh 'maven install -Dmaven.test.skip=true'
+                docker.image('kevin123zhou/maven').inside("-v $WORKSPACE:/usr/src/app"){
+                    sh 'mvn install -Dmaven.test.skip=true'
                 }
                 stash name: 'war', includes: '**/target/*.war'
             }
@@ -28,8 +28,8 @@ try {
         stage('Package') {
             node('docker') {
                 unstash 'war'
-                    docker.withRegistry('registry.hub.docker.com',dockerCredentialsID){
-                    docker.build(ContainerName).push('lastest')
+                    docker.withRegistry('https://registry.hub.docker.com',dockerCredentialsID){
+                    docker.build(ContainerName).push('latest')
                 }
             }
         }
@@ -37,8 +37,8 @@ try {
         node('docker') {
             stage('Test') {
                 unstash 'SourceCode'
-                docker.image('kevin123zhou/maven').withrun("-v '$WORKSPACE':/usr/src/webapp --rm"){
-                   sh'maven test cobertura:cobertura -Dcobertura.report.format=xml -Dmaven.test.failure.ignore -Dmaven.test.skip=true'
+                docker.image('kevin123zhou/maven').inside("-v $WORKSPACE:/usr/src/app"){
+                   sh'mvn test cobertura:cobertura -Dcobertura.report.format=xml -Dmaven.test.failure.ignore -Dmaven.test.skip=true'
                 }
             }
             stage('TestReports') {
