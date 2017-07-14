@@ -4,7 +4,7 @@
   <groupId>com.cag</groupId>
   <artifactId>maven_webapp_demo</artifactId>
   <packaging>war</packaging>
-  <version>0.0.1-snapshots</version>
+  <version>0.0.1-SNAPSHOT</version>
   <name>maven_webapp_demo Maven Webapp</name>
   <url>http://maven.apache.org</url>
   <dependencies>
