@@ -10,14 +10,14 @@ try {
         node('master') {
             properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', aeertifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '20')), pipelineTriggers([pollSCM('*/1 * * * *')])])
         }
-        node('jenkins-slave-dind') {
+        node('Docker-Host') {
             checkout([$class: 'GitSCM', branches: [[name: gitBranches]], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'CloneOption', depth: 0, noTags: false, reference: '', shallow: false, timeout: 60]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: gitCredentialsID, url: gitUrl]]])
             stash includes: '**', name: 'SourceCode'
         }
     }
     parallel ('Build': {
         stage('Build') {
-            node('jenkins-slave-dind') {
+            node('Docker-Host') {
                 unstash 'SourceCode'
                 docker.image('kevin123zhou/maven').inside("-v $WORKSPACE:/usr/src/app"){
                     sh 'mvn install -Dmaven.test.skip=true'
@@ -26,7 +26,7 @@ try {
             }
         }
         stage('Package') {
-            node('jenkins-slave-dind') {
+            node('Docker-Host') {
                 unstash 'war'
                     docker.withRegistry('https://registry.hub.docker.com',dockerCredentialsID){
                     docker.build(ContainerName).push('latest')
@@ -34,7 +34,7 @@ try {
             }
         }
     }, 'TestAndReports': {
-        node('jenkins-slave-dind') {
+        node('Docker-Host') {
             stage('Test') {
                 unstash 'SourceCode'
                 docker.image('kevin123zhou/maven').inside("-v $WORKSPACE:/usr/src/app"){
