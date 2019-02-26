@@ -6,12 +6,11 @@ def toEmail = 'kevin.zhou@softtek.com'
 def dockerCredentialsID = '99fce050-1f09-4f51-a798-f78bd8af8875'
 def ContainerName = 'mavenjunittesttomcatdemo'
 try {
-    properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', aeertifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '20')), pipelineTriggers([pollSCM('*/3 * * * *')])])
+    properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '20', daysToKeepStr: '', numToKeepStr: '20')), disableConcurrentBuilds(), gitLabConnection(''), pipelineTriggers([pollSCM('*/3 * * * *')])])
 
     node('jenkins-slave-dind') {
         stage('SCMCheckout') {
             checkout([$class: 'GitSCM', branches: [[name: gitBranches]], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'CloneOption', depth: 0, noTags: false, reference: '', shallow: false, timeout: 60]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: gitCredentialsID, url: gitUrl]]])
-            stash includes: '**', name: 'SourceCode'
         }
         stage('Build') {
             unstash 'SourceCode'
