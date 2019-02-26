@@ -1,6 +1,6 @@
 #!groovy
 def gitBranches = 'master'
-def gitCredentialsID = 'c4a4c9e0-003e-440a-afe8-bd621ffcf515'
+def gitCredentialsID = '4b8982a2-feb0-4e1b-863d-927965be0593'
 def gitUrl = 'git@github.com:fuchu/maven_webapp_demo.git'
 def toEmail = 'kevin.zhou@softtek.com'
 def dockerCredentialsID = '99fce050-1f09-4f51-a798-f78bd8af8875'
@@ -10,14 +10,14 @@ try {
         node('master') {
             properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', aeertifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '20')), pipelineTriggers([pollSCM('*/1 * * * *')])])
         }
-        node('docker') {
+        node('jenkins-slave-dind') {
             checkout([$class: 'GitSCM', branches: [[name: gitBranches]], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'CloneOption', depth: 0, noTags: false, reference: '', shallow: false, timeout: 60]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: gitCredentialsID, url: gitUrl]]])
             stash includes: '**', name: 'SourceCode'
         }
     }
     parallel ('Build': {
         stage('Build') {
-            node('docker') {
+            node('jenkins-slave-dind') {
                 unstash 'SourceCode'
                 docker.image('kevin123zhou/maven').inside("-v $WORKSPACE:/usr/src/app"){
                     sh 'mvn install -Dmaven.test.skip=true'
@@ -26,7 +26,7 @@ try {
             }
         }
         stage('Package') {
-            node('docker') {
+            node('jenkins-slave-dind') {
                 unstash 'war'
                     docker.withRegistry('https://registry.hub.docker.com',dockerCredentialsID){
                     docker.build(ContainerName).push('latest')
@@ -34,7 +34,7 @@ try {
             }
         }
     }, 'TestAndReports': {
-        node('docker') {
+        node('jenkins-slave-dind') {
             stage('Test') {
                 unstash 'SourceCode'
                 docker.image('kevin123zhou/maven').inside("-v $WORKSPACE:/usr/src/app"){
