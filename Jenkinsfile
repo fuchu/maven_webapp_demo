@@ -6,53 +6,27 @@ def toEmail = 'kevin.zhou@softtek.com'
 def dockerCredentialsID = '99fce050-1f09-4f51-a798-f78bd8af8875'
 def ContainerName = 'mavenjunittesttomcatdemo'
 try {
-    stage('SCMCheckout') {
-        node('master') {
-            properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', aeertifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '20')), pipelineTriggers([pollSCM('*/1 * * * *')])])
-        }
-        node('Docker-Host') {
+    properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', aeertifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '20')), pipelineTriggers([pollSCM('*/1 * * * *')])])
+
+    node('jenkins-slave-dind') {
+        stage('SCMCheckout') {
             checkout([$class: 'GitSCM', branches: [[name: gitBranches]], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'CloneOption', depth: 0, noTags: false, reference: '', shallow: false, timeout: 60]], submoduleCfg: [], userRemoteConfigs: [[credentialsId: gitCredentialsID, url: gitUrl]]])
             stash includes: '**', name: 'SourceCode'
         }
-    }
-    parallel ('Build': {
         stage('Build') {
-            node('Docker-Host') {
-                unstash 'SourceCode'
-                docker.image('kevin123zhou/maven').inside("-v $WORKSPACE:/usr/src/app"){
-                    sh 'mvn install -Dmaven.test.skip=true'
-                }
-                stash name: 'war', includes: '**/target/*.war'
+            unstash 'SourceCode'
+            docker.image('kevin123zhou/maven').inside("-v $WORKSPACE:/usr/src/app"){
+                sh 'mvn install -Dmaven.test.skip=true'
             }
         }
         stage('Package') {
-            node('Docker-Host') {
-                unstash 'war'
-                    docker.withRegistry('https://registry.hub.docker.com',dockerCredentialsID){
-                    docker.build(ContainerName).push('latest')
-                }
-            }
+            archiveArtifacts artifacts: '**/target/*.war', defaultExcludes: false, onlyIfSuccessful: true
         }
-    }, 'TestAndReports': {
-        node('Docker-Host') {
-            stage('Test') {
-                unstash 'SourceCode'
-                docker.image('kevin123zhou/maven').inside("-v $WORKSPACE:/usr/src/app"){
-                   sh'mvn test cobertura:cobertura -Dcobertura.report.format=xml -Dmaven.test.failure.ignore -Dmaven.test.skip=true'
-                }
-            }
-            stage('TestReports') {
-                step([$class: 'CoberturaPublisher', autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: 'online_reservation_*/target/site/cobertura/*.xml', failNoReports: false, failUnhealthy: false, failUnstable: false, maxNumberOfBuilds: 0, onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false])
-                junit allowEmptyResults: true, keepLongStdio: true, testResults: '**/target/surefire-reports/*.xml'
-            }
+        stage('Deploy') {
+            sh "skip"
         }
-    })
-    stage('Deploy') {
-        node(master) {
-            sh "docker stack deploy -c docker-compose.yml myWebappDemo"
-        }
+        notifySuccessful(toEmail)
     }
-    notifySuccessful(toEmail)
 }
 catch(Exception e){
     currentBuild.result = "FAILED"
