@@ -6,7 +6,7 @@ def toEmail = 'kevin.zhou@softtek.com'
 def dockerCredentialsID = '99fce050-1f09-4f51-a798-f78bd8af8875'
 def ContainerName = 'mavenjunittesttomcatdemo'
 try {
-    properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', aeertifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '20')), pipelineTriggers([pollSCM('*/1 * * * *')])])
+    properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', aeertifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '20')), pipelineTriggers([pollSCM('*/3 * * * *')])])
 
     node('jenkins-slave-dind') {
         stage('SCMCheckout') {
