@@ -1,3 +1,5 @@
+
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion> 
@@ -18,6 +20,20 @@
   <build>
     <finalName>ROOT</finalName>
   </build>
+  <repositories>
+   <repository>
+      <id>maven-ali</id>
+      <url>https://maven.aliyun.com/repository/public</url>
+      <releases>
+         <enabled>true</enabled>
+      </releases>
+      <snapshots>
+         <enabled>true</enabled>
+         <updatePolicy>always</updatePolicy>
+         <checksumPolicy>fail</checksumPolicy>
+      </snapshots>
+   </repository>
+  </repositories>
 <!--  <distributionManagement>
     <repository>
       <id>jfrog-releases</id>
@@ -31,16 +47,4 @@
     </snapshotRepository>
   </distributionManagement>
 -->
-  <distributionManagement>
-    <repository>
-      	<id>nexus-maven-releases</id>
-        <name>Local Nexus Maven Releases Repository</name>
-        <url>http://172.16.1.148:8081/repository/maven-releases/</url>
-    </repository>
-    <snapshotRepository>
-      	<id>nexus-maven-snapshots</id>
-      	<name>Local Nexus Maven Snapshots Repository</name>
-      	<url>http://172.16.1.148:8081/repository/maven-snapshots/</url>
-    </snapshotRepository>
-  </distributionManagement>
 </project>
